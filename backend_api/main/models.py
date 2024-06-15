@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 
 class Vendor(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    mobile = models.PositiveBigIntegerField(unique=True, null=True)
+    profile_img = models.ImageField(upload_to='seller_imgs/', null=True)
     address = models.TextField(null=True)
 
     def __str__(self):
@@ -76,7 +78,7 @@ class Order(models.Model):
         max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
-        return '%s' % (self.order_time)
+        return f'{self.order_time}'
 
 
 class OrderItems(models.Model):

@@ -52,7 +52,7 @@ const Sidebar = () => {
         Change Password
       </Link>
       <Link
-        to="/seller/orders"
+        to="/seller/logout"
         className="list-group-item list-group-item-action text-danger"
       >
         Logout

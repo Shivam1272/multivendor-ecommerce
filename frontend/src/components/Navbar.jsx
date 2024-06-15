@@ -6,7 +6,9 @@ const Navbar = () => {
   const { cartData } = useContext(CartContext);
   const { currency, setCurrency } = useContext(CurrencyContext);
   // console.log(userContext);
-
+  const checkVendor = Boolean(localStorage.getItem("vendor_login"));
+  console.log(checkVendor);
+  console.log(typeof checkVendor);
   const changeCurrency = (e) => {
     // console.log(e.target.value);
     let _currency = e.target.value;
@@ -96,29 +98,33 @@ const Navbar = () => {
                 Seller Panel
               </a>
               <ul className="dropdown-menu">
-                <li>
-                  <Link className="dropdown-item" to="/seller/register">
-                    Register
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/seller/login">
-                    Login
-                  </Link>
-                </li>
-                <li>
-                  <hr className="dropdown-divider" />
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/seller/dashboard">
-                    Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/">
-                    Logout
-                  </Link>
-                </li>
+                {checkVendor !== true ? (
+                  <>
+                    <li>
+                      <Link className="dropdown-item" to="/seller/register">
+                        Register
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item" to="/seller/login">
+                        Login
+                      </Link>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <Link className="dropdown-item" to="/seller/dashboard">
+                        Dashboard
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item" to="/seller/logout">
+                        Logout
+                      </Link>
+                    </li>
+                  </>
+                )}
               </ul>
             </li>
             <li className="nav-item">

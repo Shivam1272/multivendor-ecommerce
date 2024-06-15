@@ -41,6 +41,7 @@ import {
   Report,
   SellerProfile,
   SellerChangePassword,
+  SellerLogout,
 } from "./components/Seller";
 import { CartContext, CurrencyContext } from "./Contex";
 import { useState } from "react";
@@ -103,6 +104,7 @@ function App() {
             path="/seller/change-password"
             element={<SellerChangePassword />}
           />
+          <Route path="/seller/logout" element={<SellerLogout />} />
         </Routes>
         <Footer />
       </CartContext.Provider>

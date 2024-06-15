@@ -8,6 +8,7 @@ import Customers from "./Customer";
 import Report from "./Report";
 import SellerProfile from "./Profile";
 import SellerChangePassword from "./ChangePassword";
+import SellerLogout from "./SellerLogout";
 export {
   SellerDashBoard,
   SellerLogin,
@@ -19,4 +20,5 @@ export {
   Report,
   SellerProfile,
   SellerChangePassword,
+  SellerLogout,
 };

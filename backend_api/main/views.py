@@ -15,6 +15,83 @@ class VendorList(generics.ListCreateAPIView):
     serializer_class = serializers.VendorSerializer
 
 
+@csrf_exempt
+def vendor_login(request):
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    # print(username, password)
+    # print(authenticate(username=username, password=password))
+    if user := authenticate(username=username, password=password):
+        # print(user)
+        vendor = models.Vendor.objects.get(user=user)
+        # print(customer)
+        msg = {
+            'id': vendor.id,
+            'success': True,
+            'username': user.username,
+            'message': 'Valid Login Credentail'
+        }
+    else:
+        # print("err")
+        msg = {
+            'success': False,
+            'userData': None,
+            'message': 'Invalid Login Credentail'
+        }
+    return JsonResponse(msg)
+
+
+@csrf_exempt
+def vendor_register(request):
+    first_name = request.POST.get('first_name')
+    last_name = request.POST.get('last_name')
+    username = request.POST.get('username')
+    email = request.POST.get('email')
+    address = request.POST.get('address')
+    mobile = request.POST.get('mobile')
+    password = request.POST.get('password')
+    # print(first_name, last_name, username, email, mobile, password)
+    try:
+        if new_user := User.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            username=username,
+            email=email,
+            password=password,
+        ):
+            try:
+                vendor = models.Vendor.objects.create(
+                    user=new_user,
+                    mobile=mobile,
+                    address=address
+                )
+                msg = {
+                    'success': True,
+                    'userID': new_user.id,
+                    'vendorID': vendor.id,
+                    'message': 'User created successfully'
+                }
+            except IntegrityError:
+                msg = {
+                    'success': True,
+                    'userData': None,
+                    'message': 'Mobile Number already exists'
+                }
+        else:
+            msg = {
+                'success': False,
+                'userData': None,
+                'message': 'Failed to create user'
+            }
+    except IntegrityError:
+        msg = {
+            'success': False,
+            'userData': None,
+            'message': 'Username already exists'
+        }
+    return JsonResponse(msg)
+
+
 class VendorDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Vendor.objects.all()
     serializer_class = serializers.VendorDetailSerializer
@@ -232,13 +309,15 @@ def update_order_status(request, order_id):
     if request.method == 'POST':
         isUpdated = models.Order.objects.filter(
             id=order_id).update(order_status=True)
-        msg = {
-            'success': False,
-        }
-        if (isUpdated):
-            msg = {
+        msg = (
+            {
                 'success': True,
             }
+            if isUpdated
+            else {
+                'success': False,
+            }
+        )
     return JsonResponse(msg)
 
 
@@ -251,13 +330,15 @@ def update_product_download_count(request, product_id):
         totalDownload = int(product.download) + 1
         isUpdated = models.Product.objects.filter(
             id=product_id).update(download=totalDownload)
-        msg = {
-            'success': False,
-        }
-        if (isUpdated):
-            msg = {
+        msg = (
+            {
                 'success': True,
             }
+            if isUpdated
+            else {
+                'success': False,
+            }
+        )
     return JsonResponse(msg)
 
 
@@ -273,13 +354,7 @@ def checkInWishlist(request):
         customer_id = request.POST.get('customer')
         checkWishlist = models.Wishlist.objects.filter(
             product_id=product_id, customer_id=customer_id).count()
-        msg = {
-            'success': False
-        }
-        if checkWishlist > 0:
-            msg = {
-                'success': True
-            }
+        msg = {'success': True} if checkWishlist > 0 else {'success': False}
     return JsonResponse(msg)
 
 
@@ -290,13 +365,7 @@ def removeFromWishlist(request):
         print(wishlist_id)
         res = models.Wishlist.objects.filter(id=wishlist_id).delete()
         print(res)
-        msg = {
-            'success': False
-        }
-        if res:
-            msg = {
-                'success': True
-            }
+        msg = {'success': True} if res else {'success': False}
     return JsonResponse(msg)
 
 
