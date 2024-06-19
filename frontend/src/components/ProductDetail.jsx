@@ -16,7 +16,7 @@ const ProductDetail = () => {
   const [cartBtnClickStatus, setCartBtnClickStatus] = useState(false);
 
   // const _currency = localStorage.getItem("currency");
-  const { cartData, setCartData } = useContext(CartContext);
+  const { setCartData } = useContext(CartContext);
   const { currency } = useContext(CurrencyContext);
   const userContext = useContext(UserContext);
   // const { userCtx } = useContext(UserContext);
@@ -27,11 +27,12 @@ const ProductDetail = () => {
     const existingCart = localStorage.getItem("cart");
     if (existingCart) {
       const cartItems = JSON.parse(existingCart);
-      cartItems.map((cart) => {
-        if (cart != null && cart.product.id == product_id) {
-          setCartBtnClickStatus(true);
-        }
-      });
+      const isProductInCart = cartItems.some(
+        (cart) => cart && cart.product.id === product_id
+      );
+      if (isProductInCart) {
+        setCartBtnClickStatus(true);
+      }
     }
   };
 
@@ -79,7 +80,7 @@ const ProductDetail = () => {
           console.log(err);
         });
     })();
-  }, [product_id, baseUrl, cartBtnClickStatus, productInWishlist]);
+  }, [product_id, baseUrl, cartBtnClickStatus, productInWishlist, customerId]);
 
   if (!product || !relatedProduct) return <div>Loading....</div>;
   const tagsLinks = [];
@@ -152,7 +153,7 @@ const ProductDetail = () => {
       });
   };
 
-  console.log(productImgs);
+  console.log(product);
 
   return (
     <section className="container m-4">
@@ -163,58 +164,52 @@ const ProductDetail = () => {
             className="carousel carousel-dark carousel-fade slide"
           >
             <div className="carousel-indicators">
-              {productImgs?.map((pimage, idx) => {
-                if (idx === 0) {
-                  return (
-                    <button
-                      type="button"
-                      data-bs-target="ProductsThubmnailSlider"
-                      data-bs-slide-to={idx}
-                      className="active"
-                      aria-current="true"
-                      aria-label={`Slide ${idx}`}
-                      key={idx}
-                    ></button>
-                  );
-                } else {
-                  return (
-                    <button
-                      type="button"
-                      key={idx}
-                      data-bs-target="ProductsThubmnailSlider"
-                      data-bs-slide-to={idx}
-                      className="active"
-                      aria-current="true"
-                      aria-label={`Slide ${idx}`}
-                    ></button>
-                  );
-                }
-              })}
+              {productImgs?.length > 0 ? (
+                productImgs.map((pimage, idx) => (
+                  <button
+                    type="button"
+                    data-bs-target="#ProductsThubmnailSlider"
+                    data-bs-slide-to={idx}
+                    className={idx === 0 ? "active" : ""}
+                    aria-current={idx === 0 ? "true" : "false"}
+                    aria-label={`Slide ${idx}`}
+                    key={idx}
+                  ></button>
+                ))
+              ) : (
+                <button
+                  type="button"
+                  data-bs-target="#ProductsThubmnailSlider"
+                  data-bs-slide-to="0"
+                  className="active"
+                  aria-current="true"
+                  aria-label="Slide 0"
+                ></button>
+              )}
             </div>
             <div className="carousel-inner">
-              {productImgs.map((img, idx) => {
-                if (idx === 0) {
-                  return (
-                    <div className="carousel-item active" key={idx}>
-                      <img
-                        src={img.image}
-                        className="my-5 img-thumbnail"
-                        alt={idx}
-                      />
-                    </div>
-                  );
-                } else {
-                  return (
-                    <div className="carousel-item" key={idx}>
-                      <img
-                        src={img.image}
-                        className="my-5 img-thumbnail"
-                        alt={idx}
-                      />
-                    </div>
-                  );
-                }
-              })}
+              {productImgs?.length > 0 ? (
+                productImgs.map((img, idx) => (
+                  <div
+                    className={`carousel-item ${idx === 0 ? "active" : ""}`}
+                    key={idx}
+                  >
+                    <img
+                      src={img.image}
+                      className="my-5 img-thumbnail"
+                      alt={`Slide ${idx}`}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="carousel-item active">
+                  <img
+                    src={product.image}
+                    className="my-5 img-thumbnail"
+                    alt="Default product"
+                  />
+                </div>
+              )}
             </div>
             <button
               className="carousel-control-prev"
@@ -245,12 +240,11 @@ const ProductDetail = () => {
         <div className="col-8">
           <h1>{product.title}</h1>
           <p>{product.detail}</p>
-          {currency != "usd" ? (
+          {currency !== "usd" ? (
             <h5 className="text-muted">₹ {product.price}</h5>
           ) : (
             <h5 className="text-muted">$ {product.usd_price}</h5>
           )}
-          {/* <h5 className="text-muted">₹ {product.price}</h5> */}
           <p className="mt-3">
             <Link
               to={product.demo_url}
@@ -287,9 +281,9 @@ const ProductDetail = () => {
             >
               <i className="fa-solid fa-bag-shopping p-1"></i> Buy Now
             </Link>
-            {userContext == "true" ? (
+            {userContext === "true" ? (
               <button title="Add to Wishlist" className="btn btn-danger ms-1">
-                {productInWishlist == true ? (
+                {productInWishlist === true ? (
                   <span>
                     <i className="fa fa-heart-crack p-1 ms-1"></i>Remove From
                     Wishlist
@@ -321,51 +315,28 @@ const ProductDetail = () => {
       <div id="relatedProductsSlider" className="carousel carousel-dark slide">
         <div>
           <div className="carousel-indicators mb-auto">
-            {relatedProduct?.map((pimage, idx) => {
-              if (idx === 0) {
-                return (
-                  <button
-                    type="button"
-                    data-bs-target="relatedProductsSlider"
-                    data-bs-slide-to={idx}
-                    className="active"
-                    aria-current="true"
-                    aria-label={`Slide ${idx}`}
-                    key={idx}
-                  ></button>
-                );
-              } else {
-                return (
-                  <button
-                    type="button"
-                    key={idx}
-                    data-bs-target="relatedProductsSlider"
-                    data-bs-slide-to={idx}
-                    className="active"
-                    aria-current="true"
-                    aria-label={`Slide ${idx}`}
-                  ></button>
-                );
-              }
-            })}
+            {relatedProduct?.map((pimage, idx) => (
+              <button
+                type="button"
+                data-bs-target="#relatedProductsSlider"
+                data-bs-slide-to={idx}
+                className={idx === 0 ? "active" : ""}
+                aria-current={idx === 0 ? "true" : "false"}
+                aria-label={`Slide ${idx}`}
+                key={idx}
+              ></button>
+            ))}
           </div>
         </div>
         <div className="carousel-inner">
-          {relatedProduct?.map((pro, idx) => {
-            if (idx === 0) {
-              return (
-                <div className="carousel-item active row" key={idx}>
-                  <RelatedProductCard product={pro} />
-                </div>
-              );
-            } else {
-              return (
-                <div className="carousel-item" key={idx}>
-                  <RelatedProductCard product={pro} />
-                </div>
-              );
-            }
-          })}
+          {relatedProduct?.map((pro, idx) => (
+            <div
+              className={`carousel-item ${idx === 0 ? "active" : ""} row`}
+              key={idx}
+            >
+              <RelatedProductCard product={pro} />
+            </div>
+          ))}
         </div>
         <button
           className="carousel-control-prev"
@@ -392,7 +363,6 @@ const ProductDetail = () => {
           <span className="visually-hidden">Next</span>
         </button>
       </div>
-      {/* <h3>No Related Product</h3> */}
     </section>
   );
 };
