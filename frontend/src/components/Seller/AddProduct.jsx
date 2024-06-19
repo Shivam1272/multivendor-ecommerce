@@ -17,8 +17,12 @@ const AddProduct = () => {
     demo_url: "",
     product_file: null,
   });
+
   const baseUrl = "http://localhost:8000/api/";
   const [categories, setCategories] = useState();
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
   useEffect(() => {
     (async () => {
       try {
@@ -47,6 +51,7 @@ const AddProduct = () => {
   };
   console.log(categories);
   console.log(productData);
+
   const submitHandler = () => {
     const formData = new FormData();
     for (const key in productData) {
@@ -60,10 +65,31 @@ const AddProduct = () => {
         },
       })
       .then((response) => {
+        if (response.status === 201) {
+          setSuccessMsg("Added a New Product in MarketPlace");
+          setProductData({
+            title: "",
+            category: "",
+            vendor: vendor,
+            slug: "",
+            detail: "",
+            price: "",
+            usd_price: "",
+            tags: "",
+            image: null,
+            demo_url: "",
+            product_file: null,
+          });
+        }
+        setErrorMsg("");
         console.log(response);
       })
       .catch((error) => {
         console.error(error);
+        setErrorMsg(
+          "Unable To add a new Product in Marketplace. Please try again sometimes"
+        );
+        setSuccessMsg("");
       });
   };
 
@@ -77,6 +103,10 @@ const AddProduct = () => {
           <div className="card">
             <h4 className="card-header">Add New Product</h4>
             <div className="card-body">
+              {errorMsg && <p className="alert alert-danger">{errorMsg}</p>}
+              {successMsg && (
+                <p className="alert alert-success">{successMsg}</p>
+              )}
               <form>
                 <div className="mb-3">
                   <label htmlFor="category" className="form-label">
@@ -89,7 +119,9 @@ const AddProduct = () => {
                     onChange={inputHandler}
                   >
                     {categories?.map((item) => (
-                      <option value={item.id}>{item.title}</option>
+                      <option key={Math.random()} value={item.id}>
+                        {item.title}
+                      </option>
                     ))}
                   </select>
                 </div>

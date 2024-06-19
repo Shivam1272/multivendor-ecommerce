@@ -24,10 +24,29 @@ class VendorDetailSerializer(serializers.ModelSerializer):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=models.ProductCategory.objects.all(), required=True)
+    vendor = serializers.PrimaryKeyRelatedField(
+        queryset=models.Vendor.objects.all(), required=True)
+
     class Meta:
         model = models.Product
         fields = ['id', 'category', 'vendor', 'title', 'slug',
                   'detail', 'price', 'product_ratings', 'image', 'tags', 'tag_list', 'demo_url', "product_file", 'download', 'usd_price']
+
+    def create(self, validated_data):
+        category_data = validated_data.pop('category')
+        vendor_data = validated_data.pop('vendor')
+
+        # Fetch the Category and Vendor objects
+        category = models.ProductCategory.objects.get(id=category_data.id)
+        vendor = models.Vendor.objects.get(id=vendor_data.id)
+
+        # Create the product with the fetched category and vendor
+        product = models.Product.objects.create(
+            category=category, vendor=vendor, **validated_data)
+
+        return product
 
     def __init__(self, *args, **kwargs):
         super(ProductListSerializer, self).__init__(*args, **kwargs)
